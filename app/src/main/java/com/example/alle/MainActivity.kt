@@ -1,6 +1,9 @@
 package com.example.alle
 
+import android.Manifest.permission.*
+import android.annotation.SuppressLint
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,30 +22,71 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.example.alle.ui.theme.AlleTheme
+import com.google.accompanist.permissions.*
 import java.util.Collections.emptyList
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             AlleTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    ImageProcessingScreen()
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    StoragePermissionRequester()
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun StoragePermissionRequester() {
+    var storagePermissionState: MultiplePermissionsState? = null
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        storagePermissionState = rememberMultiplePermissionsState(mutableStateListOf(READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_VISUAL_USER_SELECTED))
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        storagePermissionState = rememberMultiplePermissionsState(mutableStateListOf(READ_MEDIA_IMAGES, READ_MEDIA_VIDEO))
+
+    } else {
+        storagePermissionState = rememberMultiplePermissionsState(mutableStateListOf(READ_EXTERNAL_STORAGE))
+    }
+
+    var showImageProcessingScreen by remember { mutableStateOf(false) }
+
+    if(showImageProcessingScreen) {
+        showImageProcessingScreen = !showImageProcessingScreen
+        ImageProcessingScreen()
+    }
+
+    if (storagePermissionState.allPermissionsGranted) {
+        // Permission is already granted, proceed with your logic
+        ImageProcessingScreen()
+    }
+    // Observe the permission state for changes
+    LaunchedEffect(storagePermissionState) {
+        when {
+            storagePermissionState.allPermissionsGranted -> showImageProcessingScreen = true
+            else ->  storagePermissionState.launchMultiplePermissionRequest()
+        }
+    }
+}
+
+
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun ImageProcessingScreen() {
     val imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
     // Logic to sync and process images
     //val imageProcessingResult by remember { viewModel().syncAndProcessImages(imageUris).collectAsState() }
-    val imageProcessingResult  = emptyList<Uri>()
+    val selectedUri = ""
     Scaffold(
         topBar = {
             TopAppBar(
@@ -66,21 +110,26 @@ fun ImageProcessingScreen() {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Display the large view (height 0.8f)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .fillMaxHeight(0.8f)
                         .background(Color.Gray)
                         .padding(16.dp)
                 ) {
-                    // You can add content inside this Box as needed
-                    Text("Large View Content Goes Here")
+                    Image(
+                        painter = rememberImagePainter(selectedUri),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(100.dp, 100.dp)
+                            .shadow(4.dp)
+                    )
                 }
 
-                // Display the LazyRow (height 0.2f)
                 LazyRow(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.2f),
                     contentPadding = PaddingValues(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -98,4 +147,6 @@ fun ImageProcessingScreen() {
         }
     )
 }
+
+
 
