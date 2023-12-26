@@ -2,13 +2,14 @@ package com.example.alle
 
 import android.Manifest.permission.*
 import android.content.ContentResolver
+import android.content.Context
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Color.White
                 ) {
-                    StoragePermissionRequester(contentResolver)
+                    StoragePermissionRequester(contentResolver, this)
                 }
             }
         }
@@ -47,7 +48,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun StoragePermissionRequester(
-    contentResolver: ContentResolver
+    contentResolver: ContentResolver, context: Context
 ) {
 
     val storagePermissionState: MultiplePermissionsState =
@@ -73,7 +74,7 @@ fun StoragePermissionRequester(
     var showImageProcessingScreen by remember { mutableStateOf(false) }
 
     if (showImageProcessingScreen) {
-        ImageProcessingScreen(contentResolver)
+        ImageProcessingScreen(contentResolver = contentResolver,context = context)
     }
 
     if (storagePermissionState.allPermissionsGranted && !showImageProcessingScreen) {
@@ -99,18 +100,17 @@ fun StoragePermissionRequester(
 @Composable
 fun ImageProcessingScreen(
     contentResolver: ContentResolver,
-    viewModel: ImageViewModel = ImageViewModel()
+    viewModel: ImageViewModel = ImageViewModel(),
+    context: Context
 ) {
     val imageUris: List<String> = viewModel.readScreenshots(contentResolver)
+    viewModel.syncAndProcessImages(Uri.parse("file://${imageUris[0]}"), context)
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(text = "Image Processing") },
                 actions = {
-                    // Refresh button to sync and process images
                     IconButton(onClick = {
-                        // Trigger image synchronization and processing
-                        // This is where you would load images from the gallery
                     }) {
                         Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
                     }
@@ -145,7 +145,6 @@ fun ImageProcessingScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(imageUris.size) { index ->
-                        Log.d("lazy", "Inside items uri = ${imageUris[index]}")
                         Image(
                             painter = rememberImagePainter("file://${imageUris[index]}"),
                             contentDescription = null,
@@ -154,10 +153,13 @@ fun ImageProcessingScreen(
                                 .width(100.dp)
                                 .shadow(2.dp).clickable {
                                     viewModel.selectedUri.value = index
+                                    viewModel.syncAndProcessImages(Uri.parse("file://${imageUris[index]}"), context)
                                 }
                         )
                     }
                 }
+
+                Text(text = viewModel.description.value)
             }
         }
     )
