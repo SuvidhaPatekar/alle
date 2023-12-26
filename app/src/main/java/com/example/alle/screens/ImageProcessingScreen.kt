@@ -39,12 +39,18 @@ fun ImageProcessingScreen(
     val loadingState = imageViewModel.loadingState.collectAsState()
 
     if (loadingState.value == LoadingState.LOADING) {
-        CircularProgressIndicator(
+        Box(
             modifier = Modifier
-                .size(48.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.primary)
-        )
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(60.dp)
+            )
+        }
     } else if(loadingState.value == LoadingState.LOADED) {
         Scaffold(
             content = {
@@ -92,18 +98,17 @@ fun ImageProcessingScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = stringResource(id = R.string.collections),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color.Black,
-                        textAlign = TextAlign.Start
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
+                    if(imageViewModel.collections.value.size > 0) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = stringResource(id = R.string.collections),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            textAlign = TextAlign.Start,
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
                     LazyRow(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -127,17 +132,17 @@ fun ImageProcessingScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = stringResource(id = R.string.description),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color.Black,
-                        textAlign = TextAlign.Start
-                    )
-
-                    Text(text = imageViewModel.description.value, color = Color.Black)
+                    if(imageViewModel.description.value.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = stringResource(id = R.string.description),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            textAlign = TextAlign.Start
+                        )
+                        Text(text = imageViewModel.description.value, color = Color.Black)
+                    }
                 }
             }
         )
