@@ -61,8 +61,13 @@ dependencies {
 
     implementation 'com.google.mlkit:text-recognition:16.0.0'
     implementation 'com.google.android.gms:play-services-mlkit-text-recognition:19.0.0'
-    implementation 'com.google.mlkit:image-labeling-common:18.1.0'
-    implementation 'com.google.mlkit:image-labeling-default-common:17.0.0'
+
+//    implementation 'com.google.android.gms:play-services-mlkit-image-labeling-custom:16.0.0-beta5'
+//    implementation 'com.google.mlkit:image-labeling-custom:17.0.2'
+
+    implementation 'com.google.android.gms:play-services-mlkit-image-labeling:16.0.8'
+    implementation 'com.google.mlkit:image-labeling:17.0.7'
+
 
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"

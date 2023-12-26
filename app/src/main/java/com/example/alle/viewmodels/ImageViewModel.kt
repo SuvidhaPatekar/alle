@@ -11,14 +11,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
-import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import kotlinx.coroutines.Dispatchers
 import okio.use
 
 
@@ -26,6 +23,7 @@ class ImageViewModel : ViewModel() {
 
     var selectedUri: MutableState<Int> = mutableStateOf(0)
     var description: MutableState<String> = mutableStateOf("")
+    var collections: MutableList<String> = mutableStateListOf("test")
 
     @SuppressLint("Range")
     fun readScreenshots(contentResolver: ContentResolver): List<String> {
@@ -77,6 +75,17 @@ class ImageViewModel : ViewModel() {
                 }
             }
             description.value = result.toString()
+        }
+
+        collections.clear()
+
+        val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
+        labeler.process(image).addOnSuccessListener {
+            for (labels in it) {
+                Log.d("Collections", "collections ${labels.text}")
+                collections.add(labels.text)
+            }
+
         }
     }
 }

@@ -74,7 +74,7 @@ fun StoragePermissionRequester(
     var showImageProcessingScreen by remember { mutableStateOf(false) }
 
     if (showImageProcessingScreen) {
-        ImageProcessingScreen(contentResolver = contentResolver,context = context)
+        ImageProcessingScreen(contentResolver = contentResolver, context = context)
     }
 
     if (storagePermissionState.allPermissionsGranted && !showImageProcessingScreen) {
@@ -134,7 +134,7 @@ fun ImageProcessingScreen(
                         .fillMaxWidth()
                         .shadow(2.dp)
                 )
-                
+
                 Spacer(modifier = Modifier.height(4.dp))
 
                 LazyRow(
@@ -151,15 +151,26 @@ fun ImageProcessingScreen(
                             modifier = Modifier
                                 .height(100.dp)
                                 .width(100.dp)
-                                .shadow(2.dp).clickable {
+                                .shadow(2.dp)
+                                .clickable {
                                     viewModel.selectedUri.value = index
-                                    viewModel.syncAndProcessImages(Uri.parse("file://${imageUris[index]}"), context)
+                                    viewModel.syncAndProcessImages(
+                                        Uri.parse("file://${imageUris[index]}"),
+                                        context
+                                    )
                                 }
                         )
                     }
                 }
 
+                var collectionText = ""
+                for (text in viewModel.collections) {
+                    collectionText = "$collectionText $text"
+                }
+                Text(text = collectionText)
+
                 Text(text = viewModel.description.value)
+
             }
         }
     )
