@@ -4,11 +4,8 @@ import android.Manifest
 import android.annotation.SuppressLint
 
 import android.os.Build
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.res.stringResource
-import com.example.alle.R
+import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -17,7 +14,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 @SuppressLint("PermissionLaunchedDuringComposition")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun StoragePermissionRequester() {
+fun StoragePermissionRequester(navController: NavController) {
 
     val storagePermissionState: MultiplePermissionsState =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -42,10 +39,10 @@ fun StoragePermissionRequester() {
     var showImageProcessingScreen by remember { mutableStateOf(false) }
 
     if (showImageProcessingScreen) {
-        ImageProcessingScreen()
+        ImageProcessingScreen(navController = navController)
     }
 
-    if (storagePermissionState.allPermissionsGranted) {
+    if (storagePermissionState.allPermissionsGranted && !showImageProcessingScreen) {
         // Permission is already granted, ImageProcessingScreen
         showImageProcessingScreen = true
     } else {

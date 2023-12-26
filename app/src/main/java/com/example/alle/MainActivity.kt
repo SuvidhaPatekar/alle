@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
-import com.example.alle.screens.StoragePermissionRequester
+import com.example.alle.screens.AppNavigation
 import com.example.alle.ui.theme.AlleTheme
 
 
@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    StoragePermissionRequester()
+                    AppNavigation()
                 }
             }
         }

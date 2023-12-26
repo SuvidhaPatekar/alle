@@ -2,6 +2,7 @@
     <string name="app_name">alle</string>
     <string name="collections">Collections</string>
     <string name="description">Description</string>
+    <string name="see_details">See Details</string>
     <string name="grant_storage_permission">Allow Storage permission</string>
 
 </resources>

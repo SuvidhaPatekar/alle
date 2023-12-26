@@ -67,7 +67,7 @@ class ImageViewModel : ViewModel() {
             }
             withContext(Dispatchers.Main) {
                 loadingState.emit(LoadingState.LOADED)
-                getDescriptionAndLabels(imageUri = Uri.parse(imageUris.value[0]), context = context)
+                //getDescriptionAndLabels(imageUri = Uri.parse(imageUris.value[0]), context = context)
             }
         }
     }
@@ -96,8 +96,6 @@ class ImageViewModel : ViewModel() {
             collections.value.addAll(it.map {imageLabel ->
                 imageLabel.text
             })
-        }.addOnCanceledListener {
-            collections.value.addAll(listOf())
         }
     }
 }
