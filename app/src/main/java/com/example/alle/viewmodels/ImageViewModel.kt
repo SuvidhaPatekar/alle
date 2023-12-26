@@ -31,7 +31,7 @@ class ImageViewModel(private val imageRepository: ImageRepository) : ViewModel()
     fun readScreenshots(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             loadingState.emit(LoadingState.LOADING)
-            imageUris.value = imageRepository.readScreenshots(context.contentResolver)
+            imageUris.value = imageRepository.readScreenshots()
             withContext(Dispatchers.Main) {
                 loadingState.emit(LoadingState.LOADED)
             }

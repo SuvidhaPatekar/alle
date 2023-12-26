@@ -7,9 +7,9 @@ import android.net.Uri
 import android.provider.MediaStore
 import okio.use
 
-class ImageRepositoryImpl : ImageRepository{
+class ImageRepositoryImpl(private val contentResolver: ContentResolver) : ImageRepository{
     @SuppressLint("Range")
-    override suspend fun readScreenshots(contentResolver: ContentResolver): MutableList<String> {
+    override suspend fun readScreenshots(): MutableList<String> {
         val imageUris: MutableList<String> = mutableListOf()
         val externalImagesUri: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 

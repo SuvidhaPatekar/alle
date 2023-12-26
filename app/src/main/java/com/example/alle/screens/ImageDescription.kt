@@ -43,12 +43,12 @@ import com.example.alle.viewmodels.ImageViewModel
 
 @Composable
 fun ImageDescription(
-    imageViewModel: ImageViewModel = viewModel{
-        ImageViewModel(ImageRepositoryImpl())
-    },
     backStackEntry: NavBackStackEntry
 ) {
     val context = LocalContext.current
+    val imageViewModel: ImageViewModel = viewModel{
+        ImageViewModel(ImageRepositoryImpl(context.contentResolver))
+    }
     val imageUri = backStackEntry.arguments?.getString("imageUri") ?: ""
     LaunchedEffect(imageUri.isNotBlank()) {
         imageViewModel.getDescriptionAndLabels(Uri.parse(imageUri), context)

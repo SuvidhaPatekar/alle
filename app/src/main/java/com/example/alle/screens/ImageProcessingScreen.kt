@@ -36,12 +36,13 @@ import java.nio.charset.StandardCharsets
 
 @Composable
 fun ImageProcessingScreen(
-    navController: NavController,
-    imageViewModel: ImageViewModel = viewModel{
-        ImageViewModel(ImageRepositoryImpl())
-    }
+    navController: NavController
 ) {
     val context = LocalContext.current
+
+    val imageViewModel: ImageViewModel = viewModel{
+        ImageViewModel(ImageRepositoryImpl(context.contentResolver))
+    }
 
     LaunchedEffect(Unit) {
         imageViewModel.readScreenshots(context)
