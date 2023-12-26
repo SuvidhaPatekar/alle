@@ -71,7 +71,7 @@ class ImageViewModel : ViewModel() {
         textRecognition.process(image).addOnSuccessListener {
             for (block in it.textBlocks) {
                 for (line in block.lines) {
-                    result.append(line.text).append("\n")
+                    result.append(line.text)
                 }
             }
             description.value = result.toString()
