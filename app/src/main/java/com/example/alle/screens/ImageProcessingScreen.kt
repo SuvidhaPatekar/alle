@@ -28,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.alle.R
+import com.example.alle.repository.ImageRepositoryImpl
 import com.example.alle.viewmodels.ImageViewModel
 import com.example.alle.viewmodels.LoadingState
 import java.net.URLEncoder
@@ -35,10 +36,13 @@ import java.nio.charset.StandardCharsets
 
 @Composable
 fun ImageProcessingScreen(
-    imageViewModel: ImageViewModel = viewModel(),
-    navController: NavController
+    navController: NavController,
+    imageViewModel: ImageViewModel = viewModel{
+        ImageViewModel(ImageRepositoryImpl())
+    }
 ) {
     val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         imageViewModel.readScreenshots(context)
     }

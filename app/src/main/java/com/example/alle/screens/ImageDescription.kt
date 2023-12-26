@@ -3,7 +3,6 @@ package com.example.alle.screens
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,12 +25,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -41,11 +38,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import coil.compose.rememberImagePainter
 import com.example.alle.R
+import com.example.alle.repository.ImageRepositoryImpl
 import com.example.alle.viewmodels.ImageViewModel
 
 @Composable
 fun ImageDescription(
-    imageViewModel: ImageViewModel = viewModel(),
+    imageViewModel: ImageViewModel = viewModel{
+        ImageViewModel(ImageRepositoryImpl())
+    },
     backStackEntry: NavBackStackEntry
 ) {
     val context = LocalContext.current
