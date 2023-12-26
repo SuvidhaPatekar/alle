@@ -5,10 +5,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +39,9 @@ fun ImageProcessingScreen(
     navController: NavController
 ) {
     val context = LocalContext.current
-    imageViewModel.readScreenshots(context)
+    LaunchedEffect(Unit) {
+        imageViewModel.readScreenshots(context)
+    }
     val loadingState = imageViewModel.loadingState.collectAsState()
 
     if (loadingState.value == LoadingState.LOADING) {
@@ -51,7 +57,7 @@ fun ImageProcessingScreen(
                     .size(60.dp)
             )
         }
-    } else if(loadingState.value == LoadingState.LOADED) {
+    } else if (loadingState.value == LoadingState.LOADED) {
         Scaffold(
             content = {
                 Column(
@@ -59,24 +65,50 @@ fun ImageProcessingScreen(
                         .fillMaxSize()
                         .background(Color.White)
                         .padding(it),
-                    verticalArrangement = Arrangement.Center,
+                    verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Box {
+                        Image(
+                            painter = rememberImagePainter(imageViewModel.imageUris.value[imageViewModel.selectedUri.value]),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxHeight(0.8f)
+                                .fillMaxWidth()
+                                .shadow(2.dp)
+                        )
 
-                    Image(
-                        painter = rememberImagePainter(imageViewModel.imageUris.value[imageViewModel.selectedUri.value]),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxHeight(0.7f)
-                            .fillMaxWidth()
-                            .shadow(2.dp)
-                    )
+                        Button(
+                            modifier = Modifier.align(Alignment.BottomEnd),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary.copy(
+                                    0.5f
+                                )
+                            ), // Change the color here,
+                            content = {
+                                Text(
+                                    text = stringResource(id = R.string.see_details),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    textAlign = TextAlign.End,
+                                )
+                            },
+                            onClick = {
+                                val encodedUrl = URLEncoder.encode(
+                                    imageViewModel.imageUris.value[imageViewModel.selectedUri.value],
+                                    StandardCharsets.UTF_8.toString()
+                                )
+                                navController.navigate("imageDescription/$encodedUrl")
+                            }
+                        )
+                    }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     LazyRow(
                         modifier = Modifier
-                            .fillMaxHeight(0.3f)
+                            .fillMaxHeight(0.4f)
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
@@ -85,7 +117,7 @@ fun ImageProcessingScreen(
                                 painter = rememberImagePainter(imageViewModel.imageUris.value[index]),
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .height(100.dp)
+                                    .height(120.dp)
                                     .width(100.dp)
                                     .clickable {
                                         imageViewModel.selectedUri.value = index
@@ -93,18 +125,6 @@ fun ImageProcessingScreen(
                             )
                         }
                     }
-
-                    Text(
-                        text = stringResource(id = R.string.see_details),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color.Black,
-                        textAlign = TextAlign.Start,
-                        modifier = Modifier.clickable {
-                            val encodedUrl = URLEncoder.encode(imageViewModel.imageUris.value[imageViewModel.selectedUri.value], StandardCharsets.UTF_8.toString())
-                            navController.navigate("imageDescription/$encodedUrl")
-                        }.align(Alignment.End).padding(8.dp)
-                    )
                 }
             }
         )

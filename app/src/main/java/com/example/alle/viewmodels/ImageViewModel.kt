@@ -67,7 +67,6 @@ class ImageViewModel : ViewModel() {
             }
             withContext(Dispatchers.Main) {
                 loadingState.emit(LoadingState.LOADED)
-                //getDescriptionAndLabels(imageUri = Uri.parse(imageUris.value[0]), context = context)
             }
         }
     }
@@ -83,7 +82,7 @@ class ImageViewModel : ViewModel() {
         textRecognition.process(image).addOnSuccessListener {
             for (block in it.textBlocks) {
                 for (line in block.lines) {
-                    result.append(line.text)
+                    result.append(line.text).append("\n")
                 }
             }
             description.value = result.toString()
