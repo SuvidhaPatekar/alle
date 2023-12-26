@@ -6,12 +6,16 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import okio.use
 
 
 class ImageViewModel : ViewModel() {
+
+    var selectedUri: MutableState<Int> = mutableStateOf(0)
 
     @SuppressLint("Range")
     fun readScreenshots(contentResolver: ContentResolver) : List<String> {

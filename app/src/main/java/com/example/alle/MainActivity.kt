@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
@@ -34,9 +35,8 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = Color.White
                 ) {
-                    Log.d("setContent", "inside setContent")
                     StoragePermissionRequester(contentResolver)
                 }
             }
@@ -73,25 +73,19 @@ fun StoragePermissionRequester(
     var showImageProcessingScreen by remember { mutableStateOf(false) }
 
     if (showImageProcessingScreen) {
-        Log.d(
-            "ImageProcessingScreen",
-            "Inside imageProcessinf screen showImageProcessingScreen"
-        )
-        //showImageProcessingScreen = !showImageProcessingScreen
         ImageProcessingScreen(contentResolver)
     }
 
     if (storagePermissionState.allPermissionsGranted && !showImageProcessingScreen) {
         Log.d("ImageProcessingScreen", "Inside imageProcessinf screen allPermissionsGranted")
         // Permission is already granted, proceed with your logic
-       showImageProcessingScreen = true
+        showImageProcessingScreen = true
     }
 
     // Observe the permission state for changes
     LaunchedEffect(!showImageProcessingScreen) {
         when {
             storagePermissionState.allPermissionsGranted && !showImageProcessingScreen -> {
-                Log.d("ImageProcessingScreen", "Inside imageProcessinf screen allPermissionsGranted")
                 showImageProcessingScreen = true
             }
             else -> {
@@ -108,14 +102,6 @@ fun ImageProcessingScreen(
     viewModel: ImageViewModel = ImageViewModel()
 ) {
     val imageUris: List<String> = viewModel.readScreenshots(contentResolver)
-
-    // Logic to sync and process images
-    //val imageProcessingResult by remember { viewModel().syncAndProcessImages(imageUris).collectAsState() }
-    val selectedUri = imageUris[0]
-    Log.d(
-        "ImageProcessingScreen",
-        "Inside imageProcessinf screen imageUris = ${imageUris.size} andselectedUri = $selectedUri "
-    )
     Scaffold(
         topBar = {
             TopAppBar(
@@ -139,38 +125,36 @@ fun ImageProcessingScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
+
+                Image(
+                    painter = rememberImagePainter("file://${imageUris[viewModel.selectedUri.value]}"),
+                    contentDescription = null,
                     modifier = Modifier
+                        .fillMaxHeight(0.6f)
                         .fillMaxWidth()
-                        .fillMaxHeight(0.7f)
-                        .background(Color.Gray)
-                        .padding(16.dp)
-                ) {
-                    Image(
-                        painter = rememberImagePainter("file://$selectedUri"),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth()
-                            .shadow(4.dp)
-                    )
-                }
+                        .shadow(2.dp)
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(0.2f),
+                        .fillMaxHeight(0.3f),
                     contentPadding = PaddingValues(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(imageUris.size) { index ->
-                        Log.d("lazy","Inside items uri = ${imageUris[index]}")
+                        Log.d("lazy", "Inside items uri = ${imageUris[index]}")
                         Image(
                             painter = rememberImagePainter("file://${imageUris[index]}"),
                             contentDescription = null,
                             modifier = Modifier
                                 .height(100.dp)
                                 .width(100.dp)
-                                .shadow(4.dp)
+                                .shadow(2.dp).clickable {
+                                    viewModel.selectedUri.value = index
+                                }
                         )
                     }
                 }
