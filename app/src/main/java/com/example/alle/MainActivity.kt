@@ -1,10 +1,10 @@
 package com.example.alle
 
 import android.Manifest.permission.*
-import android.annotation.SuppressLint
-import android.net.Uri
+import android.content.ContentResolver
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -22,8 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.example.alle.ui.theme.AlleTheme
+import com.example.alle.viewmodels.ImageViewModel
 import com.google.accompanist.permissions.*
-import java.util.Collections.emptyList
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPermissionsApi::class)
@@ -36,7 +36,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    StoragePermissionRequester()
+                    Log.d("setContent", "inside setContent")
+                    StoragePermissionRequester(contentResolver)
                 }
             }
         }
@@ -45,48 +46,76 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun StoragePermissionRequester() {
-    var storagePermissionState: MultiplePermissionsState? = null
+fun StoragePermissionRequester(
+    contentResolver: ContentResolver
+) {
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-        storagePermissionState = rememberMultiplePermissionsState(mutableStateListOf(READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_VISUAL_USER_SELECTED))
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        storagePermissionState = rememberMultiplePermissionsState(mutableStateListOf(READ_MEDIA_IMAGES, READ_MEDIA_VIDEO))
-
-    } else {
-        storagePermissionState = rememberMultiplePermissionsState(mutableStateListOf(READ_EXTERNAL_STORAGE))
-    }
+    val storagePermissionState: MultiplePermissionsState =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            rememberMultiplePermissionsState(
+                mutableStateListOf(
+                    READ_MEDIA_IMAGES,
+                    READ_MEDIA_VIDEO,
+                    READ_MEDIA_VISUAL_USER_SELECTED
+                )
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            rememberMultiplePermissionsState(
+                mutableStateListOf(
+                    READ_MEDIA_IMAGES,
+                    READ_MEDIA_VIDEO
+                )
+            )
+        } else {
+            rememberMultiplePermissionsState(mutableStateListOf(READ_EXTERNAL_STORAGE))
+        }
 
     var showImageProcessingScreen by remember { mutableStateOf(false) }
 
-    if(showImageProcessingScreen) {
-        showImageProcessingScreen = !showImageProcessingScreen
-        ImageProcessingScreen()
+    if (showImageProcessingScreen) {
+        Log.d(
+            "ImageProcessingScreen",
+            "Inside imageProcessinf screen showImageProcessingScreen"
+        )
+        //showImageProcessingScreen = !showImageProcessingScreen
+        ImageProcessingScreen(contentResolver)
     }
 
-    if (storagePermissionState.allPermissionsGranted) {
+    if (storagePermissionState.allPermissionsGranted && !showImageProcessingScreen) {
+        Log.d("ImageProcessingScreen", "Inside imageProcessinf screen allPermissionsGranted")
         // Permission is already granted, proceed with your logic
-        ImageProcessingScreen()
+       showImageProcessingScreen = true
     }
+
     // Observe the permission state for changes
-    LaunchedEffect(storagePermissionState) {
+    LaunchedEffect(!showImageProcessingScreen) {
         when {
-            storagePermissionState.allPermissionsGranted -> showImageProcessingScreen = true
-            else ->  storagePermissionState.launchMultiplePermissionRequest()
+            storagePermissionState.allPermissionsGranted && !showImageProcessingScreen -> {
+                Log.d("ImageProcessingScreen", "Inside imageProcessinf screen allPermissionsGranted")
+                showImageProcessingScreen = true
+            }
+            else -> {
+                storagePermissionState.launchMultiplePermissionRequest()
+            }
         }
     }
 }
 
-
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun ImageProcessingScreen() {
-    val imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
+fun ImageProcessingScreen(
+    contentResolver: ContentResolver,
+    viewModel: ImageViewModel = ImageViewModel()
+) {
+    val imageUris: List<String> = viewModel.readScreenshots(contentResolver)
 
     // Logic to sync and process images
     //val imageProcessingResult by remember { viewModel().syncAndProcessImages(imageUris).collectAsState() }
-    val selectedUri = ""
+    val selectedUri = imageUris[0]
+    Log.d(
+        "ImageProcessingScreen",
+        "Inside imageProcessinf screen imageUris = ${imageUris.size} andselectedUri = $selectedUri "
+    )
     Scaffold(
         topBar = {
             TopAppBar(
@@ -113,19 +142,19 @@ fun ImageProcessingScreen() {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(0.8f)
+                        .fillMaxHeight(0.7f)
                         .background(Color.Gray)
                         .padding(16.dp)
                 ) {
                     Image(
-                        painter = rememberImagePainter(selectedUri),
+                        painter = rememberImagePainter("file://$selectedUri"),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(100.dp, 100.dp)
+                            .fillMaxHeight()
+                            .fillMaxWidth()
                             .shadow(4.dp)
                     )
                 }
-
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -133,12 +162,14 @@ fun ImageProcessingScreen() {
                     contentPadding = PaddingValues(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(imageUris.size) { uri ->
+                    items(imageUris.size) { index ->
+                        Log.d("lazy","Inside items uri = ${imageUris[index]}")
                         Image(
-                            painter = rememberImagePainter(uri),
+                            painter = rememberImagePainter("file://${imageUris[index]}"),
                             contentDescription = null,
                             modifier = Modifier
-                                .size(100.dp, 100.dp)
+                                .height(100.dp)
+                                .width(100.dp)
                                 .shadow(4.dp)
                         )
                     }
@@ -147,6 +178,7 @@ fun ImageProcessingScreen() {
         }
     )
 }
+
 
 
 
