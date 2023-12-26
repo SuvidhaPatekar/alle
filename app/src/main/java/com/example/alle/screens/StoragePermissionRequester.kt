@@ -2,10 +2,13 @@ package com.example.alle.screens
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.ContentResolver
-import android.content.Context
+
 import android.os.Build
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.res.stringResource
+import com.example.alle.R
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -14,9 +17,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 @SuppressLint("PermissionLaunchedDuringComposition")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun StoragePermissionRequester(
-    contentResolver: ContentResolver, context: Context
-) {
+fun StoragePermissionRequester() {
 
     val storagePermissionState: MultiplePermissionsState =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -41,12 +42,14 @@ fun StoragePermissionRequester(
     var showImageProcessingScreen by remember { mutableStateOf(false) }
 
     if (showImageProcessingScreen) {
-        ImageProcessingScreen(contentResolver = contentResolver, context = context)
+        ImageProcessingScreen()
     }
 
-    if (storagePermissionState.allPermissionsGranted && !showImageProcessingScreen) {
+    if (storagePermissionState.allPermissionsGranted) {
         // Permission is already granted, ImageProcessingScreen
         showImageProcessingScreen = true
+    } else {
+        //Grant permission button
     }
 
     // Observe the permission state for changes

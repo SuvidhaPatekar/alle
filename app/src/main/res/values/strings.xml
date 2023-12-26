@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">alle</string>
+    <string name="collections">Collections</string>
+    <string name="description">Description</string>
+    <string name="grant_storage_permission">Allow Storage permission</string>
+
 </resources>

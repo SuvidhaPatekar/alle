@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    StoragePermissionRequester(contentResolver, this)
+                    StoragePermissionRequester()
                 }
             }
         }
